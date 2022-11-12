@@ -1,4 +1,4 @@
-const book = [
+const books = [
   {
     id: "1",
     title: `Apple. Эволюция компьютера`,
@@ -37,8 +37,9 @@ const book = [
     как ему решать повседневные задачи, какие компетенции нужны, чтобы стать выдающимся скрам-мастером, 
     какими инструментами ему нужно пользоваться.`,
   },
-];
+]
 
+localStorage.setItem('books',JSON.stringify(books));
 const rootEl = document.querySelector("#root");
 const div1 = document.createElement("div");
 div1.classList = "left";
@@ -60,7 +61,9 @@ btn.classList = "button button-add";
 div1.append(title, list, btn);
 
 const renderList = () => {
-  const renderElements = book
+  const books = JSON.parse(localStorage.getItem('books'));
+  console.log(books);
+  const renderElements = books
     .map(
       ({ title, id }) =>
         `
@@ -83,32 +86,58 @@ const renderList = () => {
 };
 
 const renderPreview = (e) => {
-  console.dir(e.target.parentElement.id);
-  const objClick = book.find((el) => el.id === e.target.parentElement.id);
+  // console.dir(e.target.parentElement.id);
+  const books = JSON.parse(localStorage.getItem('books'));
+  const objClick = books.find((el) => el.id === e.target.parentElement.id);
   console.log(objClick);
   div2.innerHTML = createPrevievMarkup(objClick);
 };
 
 const addBook = () => {
-  const newObj = { id: Date.now(), title: "", author: "", img: "", plot: "" };
+  const newObj = { id: `${Date.now()}`, title: "", author: "", img: "", plot: "" };
   div2.innerHTML = createFormMarkup(newObj);
+  createNewBook(newObj);
+  const newForm = document.querySelector('form');
+  newForm.addEventListener('submit', onSubmit)
+function onSubmit(event){
+  event.preventDefault();
+  if(newObj.title === '' || newObj.author === '' || newObj.plot === '' || newObj.img === ''){
+     alert('pease, fill all the fields')
+     return
+  }
+  const newObjSubmit = JSON.parse(localStorage.getItem('books'));
+  newObjSubmit.push(newObj);
+localStorage.setItem('books', JSON.stringify(newObjSubmit));
+renderList();
+}
+
 };
 
 const editBook = (e) => {
   console.log("editBook id: ", e.target.parentElement.id);
-  const objClick = book.find((el) => el.id === e.target.parentElement.id);
+  const objClick = books.find((el) => el.id === e.target.parentElement.id);
   console.log(objClick);
 };
 
 const deleteBook = (e) => {
+ 
+  const books = JSON.parse(localStorage.getItem('books'))
+console.log(books)
+  const delateBookIn = books.filter(book => book.id !== e.target.parentElement.id)
+console.log(delateBookIn);
   console.log("deleteBook id: ", e.target.parentElement.id);
-  const objClick = book.find((el) => el.id === e.target.parentElement.id);
-  console.log(objClick);
+  localStorage.setItem('books',JSON.stringify(delateBookIn));
+  renderList();
+ const onVissible = document.querySelector('.onVissible');
+  if(onVissible !== null && onVissible.dataset.id === e.target.parentElement.id){
+    div2.innerHTML = "";
+
+  }
 };
 
 const createPrevievMarkup = ({ id, title, author, img, plot }) => {
   return `
-  <div data-id=${id}>
+  <div class='onVissible' data-id=${id}>
     <h2>${title}</h2>
     <p>${author}</p>
     <img src="${img}"/>
@@ -135,7 +164,7 @@ const createFormMarkup = (bookObj) => {
       </label>
       <label class="form__label">
       Plot
-        <textarea type="text" name="plot" rows=12 class="form__input" id=""></textarea>
+        <input type="text" name="plot" rows=12 class="form__input" id=""></input>
       </label>
       <button type='submit' class="form__submit">Save</button>
     </form>
@@ -143,3 +172,11 @@ const createFormMarkup = (bookObj) => {
 };
 
 btn.addEventListener("click", addBook);
+
+function createNewBook(book) {
+const inputNev = document.querySelectorAll('input');
+inputNev.forEach((item) => item.addEventListener("change", onChange));
+function onChange(event){
+  book[event.target.name] = event.target.value;
+
+}}
